@@ -142,31 +142,36 @@ const onMessage = async (senderId, message) => {
         if (user[0]) {
           if (user[0].approved == true) {
             if (user[0].step == null) {
-              var numbers = message.message.text.match(/\d+/g).join("");
-              if (numbers.length == 10 && numbers.startsWith("05")) {
-                try {
-                  const sms = await axios.get(`https://${process.env.MYSERVER}/sendotp?num=${numbers.slice(1)}`);
-
-                  if (sms.data.status == "ok") {
-                    await updateUser(senderId, {step: "sms", num: numbers.slice(1), lastsms: new Date().getTime() + 5 * 60 * 1000})
-                    .then((data, error) => {
-                      if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
-                      botly.sendText({id: senderId, text: "تم إرسال الرمز إلى الرقم 💬\nيرجى نسخ الرسالة 📋 أو كتابة الارقام التي وصلتك 🔢"});
-                    });
-                  } else if (sms.data.status == "yooz") {
-                    botly.sendText({id: senderId, text: "هذا الرقم غير مؤهل لإستقبال 6 جيغا ❌ يرجى إدخال رقم عادي و ليس يوز."});
-                  } else if (sms.data.status == "down") {
-                    botly.sendText({id: senderId, text: "502!\nيوجد مشكلة في سيرفر اوريدو 🔽 (قد يدوم الامر لساعات) يرجى المحاولة في وقت اخر."});
+              if (/\d+/.test(message.message.text)) {
+                var numbers = message.message.text.match(/\d+/g).join("");
+                if (numbers.length == 10 && numbers.startsWith("05")) {
+                  try {
+                    const sms = await axios.get(`https://${process.env.MYSERVER}/sendotp?num=${numbers.slice(1)}`);
+                    
+                    if (sms.data.status == "ok") {
+                      await updateUser(senderId, {step: "sms", num: numbers.slice(1), lastsms: new Date().getTime() + 5 * 60 * 1000})
+                      .then((data, error) => {
+                        if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                        botly.sendText({id: senderId, text: "تم إرسال الرمز إلى الرقم 💬\nيرجى نسخ الرسالة 📋 أو كتابة الارقام التي وصلتك 🔢"});
+                      });
+                    } else if (sms.data.status == "yooz") {
+                      botly.sendText({id: senderId, text: "هذا الرقم غير مؤهل لإستقبال 6 جيغا ❌ يرجى إدخال رقم عادي و ليس يوز."});
+                    } else if (sms.data.status == "down") {
+                      botly.sendText({id: senderId, text: "502!\nيوجد مشكلة في سيرفر اوريدو 🔽 (قد يدوم الامر لساعات) يرجى المحاولة في وقت اخر."});
+                    }
+                  } catch (error) {
+                    //
                   }
-                } catch (error) {
-                  //
+                } else {
+                  botly.sendText({id: senderId, text: "يرجى إدخال أرقام اوريدو فقط!"});
                 }
-            } else {
-              botly.sendText({id: senderId, text: "يرجى إدخال أرقام اوريدو فقط!"});
-            }
+              } else {
+                botly.sendText({id: senderId, text: "يرجى إدخال أرقام اوريدو فقط!"});
+              }
             } else {
               // sms step
-              var numbers = message.message.text.match(/\d+/g).join('');
+              if (/\d+/.test(message.message.text)) {
+                var numbers = message.message.text.match(/\d+/g).join('');
               if (numbers.length === 6 && !isNaN(numbers)) {
                 if (user[0].lastsms > new Date().getTime()) {
                 try {
@@ -209,6 +214,14 @@ const onMessage = async (senderId, message) => {
                   if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
                   botly.sendText({id: senderId, text: "ℹ️ إنتهى وقت ادخال الرمز. المرجو طلب رمز اخر."});
                 });
+              }
+              } else {
+                botly.sendButtons({
+                  id: senderId,
+                  text: "يرجى إدخال الرمز المتكون من 6 ارقام الذي وصلك.",
+                  buttons: [
+                    botly.createPostbackButton("إلغاء العملية ❌", "del")
+                  ]});
               }
               } else {
                 botly.sendButtons({
