@@ -180,7 +180,7 @@ const onMessage = async (senderId, message) => {
                     await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
                     .then((data, error) => {
                       if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
-                      botly.sendText({id: senderId, text: "تم تفعيل 6 جيغا بنجاح ✅"});
+                      botly.sendText({id: senderId, text: "تم تفعيل 6 جيغا مجانية في شريحتك بنجاح 🥳✅.\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الـ6 جيغا صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الـ6 جيغا يمكنك تفعيلها في أي وقت مجدداً 😳🌟."});
                     });
                   } else if (otp.data.success == 0) {
                     await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
@@ -204,6 +204,8 @@ const onMessage = async (senderId, message) => {
                       buttons: [
                         botly.createPostbackButton("إلغاء العملية ❌", "del")
                       ]});
+                  } else if (error.response.status == 502) {
+                    botly.sendText({id: senderId, text: "خطأ في سيرفر أوريدو. أعد ادخال الرمز ℹ️"});
                   } else {
                     console.log("ERR access_token : ", error.response.status);
                   }
