@@ -111,7 +111,7 @@ function keepAppRunning() {
     try {
       const [response1, response2] = await Promise.all([
         pingURL(`${process.env.RENDER_EXTERNAL_URL}/ping`),
-        pingURL(process.env.MYSERVER),
+        pingURL(`https://${process.env.MYSERVER}`),
       ]);
       if (response1.statusCode == 200 && response2.statusCode == 200) {
         console.log("Both pings successful");
