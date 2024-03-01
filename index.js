@@ -123,7 +123,7 @@ async function updatekey(id, update) {
   const { data, error } = await supabase
   .from("keys")
   .update( update )
-  .eq("keys", id);
+  .eq("key", id);
   
   if (error) {
       throw new Error("Error updating user : ", error);
