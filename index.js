@@ -106,6 +106,32 @@ async function userDb(userId) {
   }
 };
 
+async function keysDb(userId) {
+  const { data, error } = await supabase
+  .from("keys")
+  .select("*")
+  .eq("key", userId);
+  
+  if (error) {
+    console.error("Error checking user:", error);
+  } else {
+    return data
+  }
+};
+
+async function updatekey(id, update) {
+  const { data, error } = await supabase
+  .from("keys")
+  .update( update )
+  .eq("keys", id);
+  
+  if (error) {
+      throw new Error("Error updating user : ", error);
+  } else {
+      return data
+  }
+};
+
 function keepAppRunning() {
   setInterval(async () => {
     try {
@@ -193,7 +219,7 @@ const onMessage = async (senderId, message) => {
                     await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
                     .then((data, error) => {
                       if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
-                      botly.sendText({id: senderId, text: `تم تفعيل ${otp.data.success} جيغا بنجاح ☑️\nℹ️ تحصلت على ${otp.data.success} فقط لأنك لم تنهي الـ${remain} المتبقية.`});
+                      botly.sendText({id: senderId, text: `تم تفعيل ${otp.data.success} جيغا بنجاح ☑️\nملاحظة ℹ️ :\nتحصلت على ${otp.data.success} فقط لأنك لم تنهي الـ${remain} المتبقية.`});
                     });
                   }
                 } catch (error) {
@@ -235,12 +261,26 @@ const onMessage = async (senderId, message) => {
               }
             }
           } else {
-            if (message.message.text == "NOTIX") {
-              await updateUser(senderId, {approved: true})
+            if (message.message.text.length == 10) {
+              const key = await keysDb(message.message.text);
+              if (key[0] && key[0].used == false) {
+                await updatekey(message.message.text, {used: true})
+                .then(async (data, error) => {
+                  if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                  await updateUser(senderId, {approved: true})
                 .then((data, error) => {
                   if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
                   botly.sendText({id: senderId, text: "تم توثيقك ☑️.\nهذا البوت خاص بتسجيل اوريدو 6 جيغا و يمكنك استعماله الان 🐱.\nنقاط مهمة 📣 :\n• لا تقم بمشاركة البوت مع الاخرين.\n• لا تقم بتسجيل الاشخاص الذين لا تعرفهم.\n• لا تقم بمشاركة مفتاحك لأنه لن يعمل للأخرين.\n• لا تقم بمشاركة لقطة شاشة مع الاخرين او نشرها في أي مكان.\n- في حالة خرق ما ذكر اعلاه 👆🏻 انت تعرض نفسك للإزالة من المشروع ❌.\nميزات البوت 🌟 :\n• تفعيل 6 جيغا يومية.\n• اذا استهلكت الـ 6 جيغا يمكنك تفعيلها مرة اخرى في أي وقت.\nالشرائح المدعومة :\n- غولد.\n- ديما.\n- ديما+.\n- يوز (قريبا).\n"});
                 });
+                });
+              } else {
+                botly.sendButtons({
+                  id: senderId,
+                  text: "انت غير موثق ❌ يرجى إدخال المفتاح الصحيح الذي قدمه لك المطور 🔑",
+                  buttons: [
+                    botly.createWebURLButton("حساب المطور 💻👤", "facebook.com/0xNoti/")
+                  ]});
+              }
             } else {
               botly.sendButtons({
                 id: senderId,
