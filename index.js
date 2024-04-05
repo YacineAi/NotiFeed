@@ -133,21 +133,15 @@ async function updatekey(id, update) {
 };
 
 function keepAppRunning() {
-  setInterval(async () => {
-    try {
-      const [response1, response2] = await Promise.all([
-        pingURL(`${process.env.RENDER_EXTERNAL_URL}/ping`),
-        pingURL(`https://${process.env.MYSERVER}`),
-      ]);
-      if (response1.statusCode == 200 && response2.statusCode == 200) {
-        console.log("Both pings successful");
-      } else {
-        console.error("At least one ping failed");
-      }
-    } catch (error) {
-      console.error("Error occurred while pinging: ", error);
-    }
-  }, 4 * 60 * 1000);
+  setInterval(() => {
+      https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, (resp) => {
+          if (resp.statusCode === 200) {
+              console.log('Ping successful');
+          } else {
+              console.error('Ping failed');
+          }
+      });
+  }, 5 * 60 * 1000);
 };
 
 async function pingURL(url) {
