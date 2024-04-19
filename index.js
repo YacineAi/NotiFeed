@@ -54,7 +54,6 @@ app.get("/", (req, res) => {
 
 /* ----- MAGIC ----- */
 app.post("/webhook", (req, res) => {
- // console.log(req.body)
   if (req.body.message) {
     onMessage(req.body.message.sender.id, req.body.message);
   } else if (req.body.postback) {
@@ -63,9 +62,7 @@ app.post("/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
-app.get("/ping", (req, res) => {
-  res.status(200).json({ message: "Ping successful" });
-});
+app.get("/ping", (req, res) => { res.status(200).json({ message: "Ping successful" }); });
 
 /* ----- DB Qrs ----- */
 async function createUser(user) {
@@ -134,30 +131,14 @@ async function updatekey(id, update) {
 
 function keepAppRunning() {
   setInterval(async () => {
-    try {
-      const [response1, response2] = await Promise.all([
-        pingURL(`${process.env.RENDER_EXTERNAL_URL}/ping`),
-        pingURL(`https://${process.env.MYSERVER}/ping`),
-      ]);
-      if (response1.statusCode == 200 && response2.statusCode == 200) {
-        console.log("Both pings successful");
+    https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, async (resp) => {
+      if (resp.statusCode == 200) {
+        console.log('Ping successful');
       } else {
-        console.error("At least one ping failed");
+        console.error('Ping failed');
       }
-    } catch (error) {
-      console.error("Error occurred while pinging: ", error);
-    }
-  }, 5 * 60 * 1000);
-};
-
-async function pingURL(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, (resp) => {
-      resolve(resp);
-    }).on("error", (error) => {
-      reject(error);
     });
-  });
+  }, 5 * 60 * 1000);
 };
 
 /* ----- HANDELS ----- */
