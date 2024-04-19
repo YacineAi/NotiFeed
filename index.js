@@ -161,8 +161,10 @@ const onMessage = async (senderId, message) => {
                         if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
                         botly.sendText({id: senderId, text: "تم إرسال الرمز إلى الرقم 💬\nيرجى نسخ الرسالة 📋 أو كتابة الارقام التي وصلتك 🔢"});
                       });
-                    } else if (sms.data.status == "yooz") {
-                      botly.sendText({id: senderId, text: "هذا الرقم غير مؤهل لإستقبال 6 جيغا ❌ يرجى إدخال رقم عادي و ليس يوز."});
+                    } else if (sms.data.status == "sent") {
+                      botly.sendText({id: senderId, text: "تم بالفعل إرسال الرمز الرجاء الانتظار قليلا و أعد الحاولة"});
+                    } else if (sms.data.status == "welcome") {
+                      botly.sendText({id: senderId, text: "يبدو أن هذا الرقم جديد الرجاء التاكد أنه يوز. أعد ارسال الرقم لتسجيله."});
                     } else if (sms.data.status == "down") {
                       botly.sendText({id: senderId, text: "502!\nيوجد مشكلة في سيرفر اوريدو 🔽 (قد يدوم الامر لساعات) يرجى المحاولة في وقت اخر."});
                     }
@@ -204,7 +206,7 @@ const onMessage = async (senderId, message) => {
                     });
                   }
                 } catch (error) {
-                  if (error.response.status == 401) {
+                  if (error.response.status == 401 || error.response.status == 400) {
                     botly.sendButtons({
                       id: senderId,
                       text: "الرمز الذي أدخلته غير صحيح ❌",
