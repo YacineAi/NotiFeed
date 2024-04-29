@@ -163,6 +163,29 @@ const onMessage = async (senderId, message) => {
                       });
                     } else if (sms.data.status == "sent") {
                       botly.sendText({id: senderId, text: "تم بالفعل إرسال الرمز الرجاء الانتظار قليلا و أعد الحاولة"});
+                    } else if (sms.data.status == "6g") {
+
+                      if (sms.data.success == 6) {
+                        await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+                        .then((data, error) => {
+                          if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                          botly.sendText({id: senderId, text: `تم تفعيل أنترنت مجانية في شريحتك بنجاح 🥳✅.\n\nℹ️ معلومات :\n\n📶 • رصيدك الان : (${sms.data.new}).\n📅 • صالح إلى غاية : ${sms.data.until}.\n\n📝 ملاحظات مفيدة 🤭\n\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الأنترنت صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الأنترنت يمكنك تفعيلها في أي وقت مجدداً 😳🌟.`});
+                        });
+                      } else if (sms.data.success == 0) {
+                        await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+                        .then((data, error) => {
+                          if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                          botly.sendText({id: senderId, text: "انت بالفعل تملك 6 جيغا ❌ يرجى إستهلاكها و طلب التفعيل مجددا ✅"});
+                        });
+                      } else {
+                        var remain = 6 - sms.data.success;
+                        await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+                        .then((data, error) => {
+                          if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                          botly.sendText({id: senderId, text: `تم تفعيل أنترنت مجانية في شريحتك بنجاح 🥳✅.\n\nℹ️ معلومات :\n\n📶 • رصيدك الان : (${sms.data.new}).\n📅 • صالح إلى غاية : ${sms.data.until}.\n\n📝 ملاحظات مفيدة 🤭\n\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الأنترنت صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الأنترنت يمكنك تفعيلها في أي وقت مجدداً 😳🌟.`});
+                        });
+                      }
+
                     } else if (sms.data.status == "welcome") {
                       botly.sendText({id: senderId, text: "يبدو أن هذا الرقم جديد الرجاء التاكد أنه يوز. أعد ارسال الرقم لتسجيله."});
                     } else if (sms.data.status == "down") {
