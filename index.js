@@ -153,7 +153,8 @@ const onMessage = async (senderId, message) => {
                 var numbers = message.message.text.match(/\d+/g).join("");
                 if (numbers.length == 10 && numbers.startsWith("05")) {
                   try {
-                    const sms = await axios.get(`https://${process.env.MYSERVER}/sendotp?num=${numbers.slice(1)}`);
+                    botly.sendText({id: senderId, text: "إنتظر قليلاً... سيتم إرسال رمز أو تفعيل أنترنت مجانية في شريحتك مباشرة"}, async () => {
+                      const sms = await axios.get(`https://${process.env.MYSERVER}/sendotp?num=${numbers.slice(1)}`);
                     
                     if (sms.data.status == "ok") {
                       await updateUser(senderId, {step: "sms", num: numbers.slice(1), lastsms: new Date().getTime() + 5 * 60 * 1000})
@@ -164,7 +165,7 @@ const onMessage = async (senderId, message) => {
                     } else if (sms.data.status == "sent") {
                       botly.sendText({id: senderId, text: "تم بالفعل إرسال الرمز الرجاء الانتظار قليلا و أعد الحاولة"});
                     } else if (sms.data.status == "6g") {
-
+                      
                       if (sms.data.success == 6) {
                         await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
                         .then((data, error) => {
@@ -191,6 +192,7 @@ const onMessage = async (senderId, message) => {
                     } else if (sms.data.status == "down") {
                       botly.sendText({id: senderId, text: "502!\nيوجد مشكلة في سيرفر اوريدو 🔽 (قد يدوم الامر لساعات) يرجى المحاولة في وقت اخر."});
                     }
+                    });
                   } catch (error) {
                     //
                   }
@@ -207,7 +209,8 @@ const onMessage = async (senderId, message) => {
               if (numbers.length === 6 && !isNaN(numbers)) {
                 if (user[0].lastsms > new Date().getTime()) {
                 try {
-                  const otp = await axios.get(`https://${process.env.MYSERVER}/verifyotp?num=${user[0].num}&otp=${numbers}`);
+                  botly.sendText({id: senderId, text: "إنتظر قليلاً... سيتم تفعيل أنترنت مجانية في شريحتك"}, async () => {
+                    const otp = await axios.get(`https://${process.env.MYSERVER}/verifyotp?num=${user[0].num}&otp=${numbers}`);
                   if (otp.data.success == 6) {
                     await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
                     .then((data, error) => {
@@ -228,6 +231,7 @@ const onMessage = async (senderId, message) => {
                       botly.sendText({id: senderId, text: `تم تفعيل أنترنت مجانية في شريحتك بنجاح 🥳✅.\n\nℹ️ معلومات :\n\n📶 • رصيدك الان : (${otp.data.new}).\n📅 • صالح إلى غاية : ${otp.data.until}.\n\n📝 ملاحظات مفيدة 🤭\n\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الأنترنت صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الأنترنت يمكنك تفعيلها في أي وقت مجدداً 😳🌟.`});
                     });
                   }
+                  });
                 } catch (error) {
                   if (error.response.status == 401 || error.response.status == 400) {
                     botly.sendButtons({
