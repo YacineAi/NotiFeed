@@ -173,13 +173,27 @@ const onMessage = async (senderId, message) => {
                           botly.sendText({id: senderId, text: `تم تفعيل أنترنت مجانية في شريحتك بنجاح 🥳✅.\n\nℹ️ معلومات :\n\n📶 • رصيدك الان : (${sms.data.new}).\n📅 • صالح إلى غاية : ${sms.data.until}.\n\n📝 ملاحظات مفيدة 🤭\n\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الأنترنت صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الأنترنت يمكنك تفعيلها في أي وقت مجدداً 😳🌟.`});
                         });
                       } else if (sms.data.success == 0) {
-                        await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
-                        .then((data, error) => {
-                          if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
-                          botly.sendText({id: senderId, text: "انت بالفعل تملك 6 جيغا ❌ يرجى إستهلاكها و طلب التفعيل مجددا ✅"});
-                        });
+                        const gb = otp.data.new.split(".")[0];
+                        if (gb <= 3) { // not more then 3
+                          await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+                          .then((data, error) => {
+                            if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                             botly.sendButtons({
+                              id: senderId,
+                              text: `تم الوصول للحد الاقصى 🚫\nإذا اردت الحصول على أكثر من (${otp.data.new}) إضغط على تعبئة 🛜😅.\n\nملاحظة 📝 :\n• أقصى حد هو 6 جيغا أو 7 جيغا ✅.`,
+                              buttons: [
+                                botly.createPostbackButton("تعبئة 🛜", `${numbers}`)
+                              ]
+                            });
+                          });
+                        } else {
+                          await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+                          .then((data, error) => {
+                            if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                            botly.sendText({id: senderId, text: `عذرا 😐.\nلديك بالفعل كمية كافية في الوقت الحالي ✅.\nيمكنك إعادة التعبئة عندما يكون رصيدك أقل أو يساوي 3 جيغا 🛜.\n\nℹ️ معلومات :\n📶 • رصيدك الان : (${otp.data.new}).\n📅 • صالح إلى غاية : ${otp.data.until}.`});
+                          });
+                        }
                       } else {
-                        var remain = 6 - sms.data.success;
                         await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
                         .then((data, error) => {
                           if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
