@@ -362,7 +362,7 @@ const onPostBack = async (senderId, message, postback) => {
       } else if (message.postback.title == "تعبئة 🛜") {
         try {
           botly.sendText({id: senderId, text: "إنتظر قليلاً... سيتم إرسال رمز أو تفعيل أنترنت مجانية في شريحتك مباشرة"}, async () => {
-            const refill = await axios.get(`https://${process.env.MYSERVER}/refill?num=${numbers.slice(1)}`);
+            const refill = await axios.get(`https://${process.env.MYSERVER}/refill?num=${postback}`);
             
             if (refill.data.status == "ok") {
 
@@ -385,7 +385,7 @@ const onPostBack = async (senderId, message, postback) => {
                     id: senderId,
                     text: `تم الوصول للحد الاقصى 🚫\nإذا اردت الحصول على أكثر من (${refill.data.new}) إضغط على تعبئة 🛜😅.\n\nملاحظة 📝 :\n• أقصى حد هو 6 جيغا أو 7 جيغا ✅.`,
                     buttons: [
-                      botly.createPostbackButton("تعبئة 🛜", `${numbers.slice(1)}`)
+                      botly.createPostbackButton("تعبئة 🛜", `${postback}`)
                     ]
                   });
                 });
