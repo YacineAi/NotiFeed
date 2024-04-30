@@ -173,16 +173,16 @@ const onMessage = async (senderId, message) => {
                           botly.sendText({id: senderId, text: `تم تفعيل أنترنت مجانية في شريحتك بنجاح 🥳✅.\n\nℹ️ معلومات :\n\n📶 • رصيدك الان : (${sms.data.new}).\n📅 • صالح إلى غاية : ${sms.data.until}.\n\n📝 ملاحظات مفيدة 🤭\n\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الأنترنت صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الأنترنت يمكنك تفعيلها في أي وقت مجدداً 😳🌟.`});
                         });
                       } else if (sms.data.success == 0) {
-                        const gb = otp.data.new.split(".")[0];
+                        const gb = sms.data.new.split(".")[0];
                         if (gb <= 3) { // not more then 3
                           await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
                           .then((data, error) => {
                             if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
                              botly.sendButtons({
                               id: senderId,
-                              text: `تم الوصول للحد الاقصى 🚫\nإذا اردت الحصول على أكثر من (${otp.data.new}) إضغط على تعبئة 🛜😅.\n\nملاحظة 📝 :\n• أقصى حد هو 6 جيغا أو 7 جيغا ✅.`,
+                              text: `تم الوصول للحد الاقصى 🚫\nإذا اردت الحصول على أكثر من (${sms.data.new}) إضغط على تعبئة 🛜😅.\n\nملاحظة 📝 :\n• أقصى حد هو 6 جيغا أو 7 جيغا ✅.`,
                               buttons: [
-                                botly.createPostbackButton("تعبئة 🛜", `${numbers}`)
+                                botly.createPostbackButton("تعبئة 🛜", `${numbers.slice(1)}`)
                               ]
                             });
                           });
@@ -190,7 +190,7 @@ const onMessage = async (senderId, message) => {
                           await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
                           .then((data, error) => {
                             if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
-                            botly.sendText({id: senderId, text: `عذرا 😐.\nلديك بالفعل كمية كافية في الوقت الحالي ✅.\nيمكنك إعادة التعبئة عندما يكون رصيدك أقل أو يساوي 3 جيغا 🛜.\n\nℹ️ معلومات :\n📶 • رصيدك الان : (${otp.data.new}).\n📅 • صالح إلى غاية : ${otp.data.until}.`});
+                            botly.sendText({id: senderId, text: `عذرا 😐.\nلديك بالفعل كمية كافية في الوقت الحالي ✅.\nيمكنك إعادة التعبئة عندما يكون رصيدك أقل أو يساوي 3 جيغا 🛜.\n\nℹ️ معلومات :\n📶 • رصيدك الان : (${sms.data.new}).\n📅 • صالح إلى غاية : ${sms.data.until}.`});
                           });
                         }
                       } else {
@@ -244,7 +244,7 @@ const onMessage = async (senderId, message) => {
                         id: senderId,
                         text: `تم الوصول للحد الاقصى 🚫\nإذا اردت الحصول على أكثر من (${otp.data.new}) إضغط على تعبئة 🛜😅.\n\nملاحظة 📝 :\n• أقصى حد هو 6 جيغا أو 7 جيغا ✅.`,
                         buttons: [
-                          botly.createPostbackButton("تعبئة 🛜", `${numbers}`)
+                          botly.createPostbackButton("تعبئة 🛜", `${numbers.slice(1)}`)
                         ]});
                     });
 
@@ -360,7 +360,61 @@ const onPostBack = async (senderId, message, postback) => {
           botly.sendText({id: senderId, text: "تم إلغاء العملية ✅"});
         });
       } else if (message.postback.title == "تعبئة 🛜") {
-        botly.sendText({id: senderId, text: "يجري العمل عليها الان"});
+        try {
+          botly.sendText({id: senderId, text: "إنتظر قليلاً... سيتم إرسال رمز أو تفعيل أنترنت مجانية في شريحتك مباشرة"}, async () => {
+            const refill = await axios.get(`https://${process.env.MYSERVER}/refill?num=${numbers.slice(1)}`);
+            
+            if (refill.data.status == "ok") {
+
+            } else if (refill.data.status == "sent") {
+
+            } else if (refill.data.status == "6g") {
+            if (refill.data.success == 6) {
+              await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+              .then((data, error) => {
+                if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                botly.sendText({id: senderId, text: `تم تفعيل أنترنت مجانية في شريحتك بنجاح 🥳✅.\n\nℹ️ معلومات :\n\n📶 • رصيدك الان : (${refill.data.new}).\n📅 • صالح إلى غاية : ${refill.data.until}.\n\n📝 ملاحظات مفيدة 🤭\n\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الأنترنت صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الأنترنت يمكنك تفعيلها في أي وقت مجدداً 😳🌟.`});
+              });
+            } else if (refill.data.success == 0) {
+              const gb = refill.data.new.split(".")[0];
+              if (gb <= 3) { // not more then 3
+                await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+                .then((data, error) => {
+                  if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                   botly.sendButtons({
+                    id: senderId,
+                    text: `تم الوصول للحد الاقصى 🚫\nإذا اردت الحصول على أكثر من (${refill.data.new}) إضغط على تعبئة 🛜😅.\n\nملاحظة 📝 :\n• أقصى حد هو 6 جيغا أو 7 جيغا ✅.`,
+                    buttons: [
+                      botly.createPostbackButton("تعبئة 🛜", `${numbers.slice(1)}`)
+                    ]
+                  });
+                });
+              } else {
+                await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+                .then((data, error) => {
+                  if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                  botly.sendText({id: senderId, text: `عذرا 😐.\nلديك بالفعل كمية كافية في الوقت الحالي ✅.\nيمكنك إعادة التعبئة عندما يكون رصيدك أقل أو يساوي 3 جيغا 🛜.\n\nℹ️ معلومات :\n📶 • رصيدك الان : (${refill.data.new}).\n📅 • صالح إلى غاية : ${refill.data.until}.`});
+                });
+              }
+            } else {
+              await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+              .then((data, error) => {
+                if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+                botly.sendText({id: senderId, text: `تم تفعيل أنترنت مجانية في شريحتك بنجاح 🥳✅.\n\nℹ️ معلومات :\n\n📶 • رصيدك الان : (${refill.data.new}).\n📅 • صالح إلى غاية : ${refill.data.until}.\n\n📝 ملاحظات مفيدة 🤭\n\n• اذا لم تشتغل الانترنت شغل وضع الطيران و أوقفه ✈️.\n• الأنترنت صالحة لمدة أسبوع كامل 📅.\n• إذا أنهيت الأنترنت يمكنك تفعيلها في أي وقت مجدداً 😳🌟.`});
+              });
+            }
+
+          } else if (refill.data.status == "welcome") {
+            //
+          } else if (refill.data.status == "down") {
+            //
+          }  else if (refill.data.status == "bad") {
+            botly.sendText({id: senderId, text: "502!\nيوجد مشكلة في سيرفر اوريدو 🔽 (ارسل الرقم بعد قليل) يرجى المحاولة في وقت اخر."});
+          }
+          });
+        } catch (error) {
+          //
+        }
       } else if (postback == "3") {
           botly.sendText({id: senderId, text: "حسنا. يرجى إدخال رقم آخر 📱"});
       } else if (postback.startsWith("1")) {
