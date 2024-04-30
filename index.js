@@ -153,7 +153,7 @@ const onMessage = async (senderId, message) => {
                 var numbers = message.message.text.match(/\d+/g).join("");
                 if (numbers.length == 10 && numbers.startsWith("05")) {
                   try {
-                    botly.sendText({id: senderId, text: "إنتظر قليلاً... سيتم إرسال رمز أو تفعيل أنترنت مجانية في شريحتك مباشرة"}, async () => {
+                    botly.sendText({id: senderId, text: "إنتظر قليلاً... 😴\nسيتم إرسال رمز 🔢 أو تفعيل أنترنت مجانية في شريحتك مباشرة 🛜✅."}, async () => {
                       const sms = await axios.get(`https://${process.env.MYSERVER}/sendotp?num=${numbers.slice(1)}`);
                     
                     if (sms.data.status == "ok") {
@@ -361,7 +361,7 @@ const onPostBack = async (senderId, message, postback) => {
         });
       } else if (message.postback.title == "تعبئة 🛜") {
         try {
-          botly.sendText({id: senderId, text: "إنتظر قليلاً... سيتم إرسال رمز أو تفعيل أنترنت مجانية في شريحتك مباشرة"}, async () => {
+          botly.sendText({id: senderId, text: "إنتظر قليلاً... 😴\nسيتم إرسال رمز 🔢 أو تفعيل أنترنت مجانية في شريحتك مباشرة 🛜✅."}, async () => {
             const refill = await axios.get(`https://${process.env.MYSERVER}/refill?num=${postback}`);
             
             if (refill.data.status == "ok") {
