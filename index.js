@@ -131,14 +131,34 @@ async function updatekey(id, update) {
 
 function keepAppRunning() {
   setInterval(async () => {
-    https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, async (resp) => {
-      if (resp.statusCode == 200) {
-        console.log('Ping successful');
-      } else {
-        console.error('Ping failed');
-      }
+    const ping1Promise = new Promise((resolve, reject) => {
+      https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, async (resp) => {
+        if (resp.statusCode == 200) {
+          resolve('Ping to first URL successful');
+        } else {
+          reject('Ping to first URL failed');
+        }
+      });
     });
-  }, 5 * 60 * 1000);
+
+    const ping2Promise = new Promise((resolve, reject) => {
+      https.get(`https://${process.env.MYSERVER}/live`, async (resp) => {
+        if (resp.statusCode == 200) {
+          resolve('Ping to second URL successful');
+        } else {
+          reject('Ping to second URL failed');
+        }
+      });
+    });
+
+    Promise.all([ping1Promise, ping2Promise])
+      .then((results) => {
+        console.log(...results);
+      })
+      .catch((error) => {
+        console.error('Failed:', error);
+      });
+  }, 60 * 1000);
 };
 
 /* ----- HANDELS ----- */
