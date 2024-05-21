@@ -129,36 +129,35 @@ async function updatekey(id, update) {
   }
 };
 
-function keepAppRunning() {
+async function pingURL(url) {
+  try {
+    const response = await axios.get(url);
+    if (response.status === 200) {
+      return `Ping to ${url} successful`;
+    } else {
+      throw new Error(`Ping to ${url} failed with status code: ${response.status}`);
+    }
+  } catch (error) {
+    throw new Error(`Ping to ${url} failed: ${error.message}`);
+  }
+}
+
+async function keepAppRunning() {
   setInterval(async () => {
     try {
-      const response1 = await new Promise((resolve, reject) => {
-        https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, async (resp) => {
-          if (resp.statusCode === 200) {
-            resolve('Ping to first URL successful');
-          } else {
-            reject('Ping to first URL failed');
-          }
-        });
-      });
+      const renderUrl = `${process.env.RENDER_EXTERNAL_URL}/ping`;
+      const myServerUrl = `https://${process.env.MYSERVER}/auto`;
 
-      const response2 = await new Promise((resolve, reject) => {
-        axios.get(`https://${process.env.MYSERVER}/auto`, async (resp) => {
-          if (resp.status === 200) {
-            resolve('Auto Refill successful');
-          } else {
-            reject('Auto Refill failed');
-          }
-        });
-      });
+      const response1 = await pingURL(renderUrl);
+      const response2 = await pingURL(myServerUrl);
 
       console.log(response1);
       console.log(response2);
     } catch (error) {
-      console.error('Failed:', error);
+      console.error('Failed:', error.message);
     }
-  }, 5 * 60 * 1000);
-};
+  }, 5 * 60 * 1000); // Run every 5 minutes
+}
 
 /* ----- HANDELS ----- */
 
