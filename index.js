@@ -143,8 +143,8 @@ function keepAppRunning() {
       });
 
       const response2 = await new Promise((resolve, reject) => {
-        https.get(`https://${process.env.MYSERVER}/auto`, async (resp) => {
-          if (resp.statusCode === 200) {
+        axios.get(`https://${process.env.MYSERVER}/auto`, async (resp) => {
+          if (resp.status === 200) {
             resolve('Auto Refill successful');
           } else {
             reject('Auto Refill failed');
