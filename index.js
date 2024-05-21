@@ -142,29 +142,12 @@ function keepAppRunning() {
         });
       });
 
-      const options = {
-        headers: {
-          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-          "accept-language": "en,ar-DZ;q=0.9,ar;q=0.8",
-          "if-none-match": "W/\"1d-5Q+z6jtqwLcQZMsuqmzXB2rnQdo\"",
-          "priority": "u=0, i",
-          "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
-          "sec-ch-ua-mobile": "?0",
-          "sec-ch-ua-platform": "\"Windows\"",
-          "sec-fetch-dest": "document",
-          "sec-fetch-mode": "navigate",
-          "sec-fetch-site": "none",
-          "sec-fetch-user": "?1",
-          "upgrade-insecure-requests": "1"
-        }
-      };
-
       const response2 = await new Promise((resolve, reject) => {
-        https.get(`https://${process.env.MYSERVER}/live`, options, async (resp) => {
+        https.get(`https://${process.env.MYSERVER}/auto`, async (resp) => {
           if (resp.statusCode === 200) {
-            resolve('Ping to second URL successful');
+            resolve('Auto Refill successful');
           } else {
-            reject('Ping to second URL failed');
+            reject('Auto Refill failed');
           }
         });
       });
