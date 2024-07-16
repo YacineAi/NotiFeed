@@ -163,6 +163,14 @@ async function keepAppRunning() {
 
 const onMessage = async (senderId, message) => {
     if (message.message.text) {
+
+      if (message.message.text.includes("حذف")) {
+        await updateUser(senderId, {step: null, num: null, token: null, lastsms: null})
+        .then((data, error) => {
+          if (error) { botly.sendText({id: senderId, text: "حدث خطأ"}); }
+          botly.sendText({id: senderId, text: "تم إلغاء العملية ✅"});
+        });
+      } else {
         const user = await userDb(senderId);
         if (user[0]) {
           if (user[0].approved == true) {
@@ -380,6 +388,7 @@ const onMessage = async (senderId, message) => {
                 ]});
               });
             }
+      }
     } else if (message.message.attachments[0].payload.sticker_id) {
         botly.sendText({id: senderId, text: "(Y)"});
     } else if (message.message.attachments[0].type == "image" || message.message.attachments[0].type == "audio" || message.message.attachments[0].type == "video") {
